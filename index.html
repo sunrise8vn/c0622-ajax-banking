@@ -18,39 +18,16 @@
                     <h1>List of customers</h1>
                 </div>
                 <div class="col-sm-7">
-                    <a href="/customers/create" class="btn btn-outline-light"><i class="fa fa-plus-square-o" aria-hidden="true"></i> <span>Add New Customer</span></a>
+                    <button id="btnShowCreateModal" class="btn btn-outline-light">
+                        <i class="fa fa-plus-square-o" aria-hidden="true"></i> 
+                        <span>Add New Customer</span>
+                    </button>
                     <a href="/transfers" class="btn btn-outline-light"><i class="fa fa-history" aria-hidden="true"></i> <span>Transfer money Information</span></a>
                 </div>
             </div>
         </header>
 
         <div class="content">
-            <form id="frmCreateCustomer" method="post">
-                <fieldset class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Full name</label>
-                        <input type="text" class="form-control" id="fullNameCre">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Email</label>
-                        <input type="text" class="form-control" id="emailCre">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Phone</label>
-                        <input type="tel" class="form-control" id="phoneCre">
-                    </div>
-                    <div class="col-md-6 mb-2">
-                        <label class="form-label">Address</label>
-                        <input type="text" class="form-control" id="addressCre">
-                    </div>
-                </fieldset>
-            </form>
-            <div class="col-md-12 mt-2">
-                <button id="btnCreateCustomer" class="btn btn-outline-primary">
-                    <i class="fa fa-plus" aria-hidden="true"></i>
-                    Create customer
-                </button>
-            </div>
 
             <table class="table table-hover" id="tbCustomer">
                 <thead>
@@ -75,8 +52,53 @@
         </footer>
     </div>
 
-    <!-- Modal -->
-    <div class="modal fade" id="modalUpdate" tabindex="-1">
+
+    <!-- Modal Create Customer -->
+    <div class="modal fade" id="modalCreateCustomer" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header modal-header-create">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Modal create</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-alert-danger hide"></div>
+
+                    <form id="frmCreateCustomer" method="post">
+                        <fieldset class="row g-3">
+                            <input type="hidden" id="customerIdCre">
+                            <div class="col-md-6">
+                                <label class="form-label">Full name</label>
+                                <input type="text" class="form-control" id="fullNameCre" name="fullNameCre">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email</label>
+                                <input type="text" class="form-control" id="emailCre" name="emailCre">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Phone</label>
+                                <input type="tel" class="form-control" id="phoneCre" name="phoneCre">
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label">Address</label>
+                                <input type="text" class="form-control" id="addressCre" name="addressCre">
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" id="btnCreate" class="btn btn-outline-primary">
+                        <i class="fas fa-plus"></i>
+                        Create
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Update Customer -->
+    <div class="modal fade" id="modalUpdateCustomer" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header modal-header-update">
@@ -89,19 +111,19 @@
                             <input type="hidden" id="customerIdUp">
                             <div class="col-md-6">
                                 <label class="form-label">Full name</label>
-                                <input type="text" class="form-control" id="fullNameUp">
+                                <input type="text" class="form-control" id="fullNameUp" name="fullNameUp">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Email</label>
-                                <input type="text" class="form-control" id="emailUp">
+                                <input type="text" class="form-control" id="emailUp" name="emailUp">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Phone</label>
-                                <input type="tel" class="form-control" id="phoneUp">
+                                <input type="tel" class="form-control" id="phoneUp" name="phoneUp">
                             </div>
                             <div class="col-md-6 mb-2">
                                 <label class="form-label">Address</label>
-                                <input type="text" class="form-control" id="addressUp">
+                                <input type="text" class="form-control" id="addressUp" name="addressUp">
                             </div>
                         </fieldset>
                     </form>
@@ -119,39 +141,79 @@
 
 
     <script src="/assets/jquery/jquery-3.6.1.min.js"></script>
+    <script src="/assets/jquery/jquery.validate-1.19.5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
 
     <script src="/assets/js/app.js"></script>
 
     <script>
 
-        let count = 1;
+        const page = {
+            urls: {
+                getAllCustomers: App.CUSTOMER_API + "?deleted=0",
+                getCustomerById: App.CUSTOMER_API,
+                createCustomer: App.CUSTOMER_API,
+                updateCustomer: App.CUSTOMER_API
+            },
+            elements: {},
+            loadData: {},
+            commands: {},
+            dialogs: {
+                elements: {},
+                loadData: {},
+                commands: {},
+                alertDanger: {}
+            },
+            inintializeEventControl: {}
+        }
 
-        let customers = [];
+        page.elements.btnShowCreateModal = $("#btnShowCreateModal");
+        page.elements.tbCustomer = $("#tbCustomer");
+        page.elements.tbCustomerBody = $("#tbCustomer tbody");
+
+        page.dialogs.elements.modalCreateCustomer = $("#modalCreateCustomer");
+        page.dialogs.elements.frmCreateCustomer = $("#frmCreateCustomer");
+        page.dialogs.elements.customerIdCre = $("#customerIdCre");
+        page.dialogs.elements.fullNameCre = $("#fullNameCre");
+        page.dialogs.elements.emailCre = $("#emailCre");
+        page.dialogs.elements.phoneCre = $("#phoneCre");
+        page.dialogs.elements.addressCre = $("#addressCre");
+        page.dialogs.elements.btnCreate = $("#btnCreate");
+
+        page.dialogs.elements.modalUpdateCustomer = $("#modalUpdateCustomer");
+        page.dialogs.elements.frmUpdateCustomer = $("#frmUpdateCustomer");
+        page.dialogs.elements.customerIdUp = $("#customerIdUp");
+        page.dialogs.elements.fullNameUp = $("#fullNameUp");
+        page.dialogs.elements.emailUp = $("#emailUp");
+        page.dialogs.elements.phoneUp = $("#phoneUp");
+        page.dialogs.elements.addressUp = $("#addressUp");
+        page.dialogs.elements.btnUpdate = $("#btnUpdate");
+
+        page.dialogs.alertDanger.modalCreate = $("#modalCreateCustomer .modal-body .modal-alert-danger");
+        page.dialogs.alertDanger.modalUpdate = $("#modalUpdateCustomer .modal-body .modal-alert-danger");
+
 
         let customer = new Customer();
 
 
-        function getAllCustomers() {
+        page.commands.getAllCustomers = () => {
             $.ajax({
                 headers: {
                     "accept": "application/json",
                     "content-type": "application/json"
                 },
                 type: "GET",
-                url: "http://localhost:3003/customers?deleted=0"
+                url: page.urls.getAllCustomers
             })
             .done((data) => {
-                console.log(data);
-                customers = data;
 
-                $.each(customers, (i, item) => {
+                $.each(data, (i, item) => {
                     let str = renderCustomer(item);
                     
-                    $("#tbCustomer tbody").append(str);
+                    page.elements.tbCustomerBody.prepend(str);
                 })
                 
-                handleShowUpdateModal();
+                page.commands.handleShowUpdateModal();
             })
             .fail((error) => {
                 console.error(error);
@@ -159,10 +221,10 @@
         }
 
 
-        function getCustomerById(customerId) {
+        page.commands.getCustomerById = (customerId) => {
             return $.ajax({
                 type: "GET",
-                url: "http://localhost:3003/customers/" + customerId
+                url: page.urls.getCustomerById + "/" + customerId
             })
             .done((data) => {
                 // customer = data;
@@ -172,8 +234,6 @@
             })
         }
 
-
-        getAllCustomers();
 
         function renderCustomer(obj) {
             return `
@@ -219,23 +279,33 @@
         }
 
         
-        function createCustomer(obj) {
+        page.commands.createCustomer = () => {
+            customer.fullName = page.dialogs.elements.fullNameCre.val();
+            customer.email = page.dialogs.elements.emailCre.val();
+            customer.phone = page.dialogs.elements.phoneCre.val();
+            customer.address = page.dialogs.elements.addressCre.val();
+            customer.balance = 0;
+            customer.deleted = 0;
+
             $.ajax({
                 headers: {
                     "accept": "application/json",
                     "content-type": "application/json"
                 },
                 type: "POST",
-                url: "http://localhost:3003/customers",
-                data: JSON.stringify(obj)
+                url: page.urls.createCustomer,
+                data: JSON.stringify(customer)
             })
             .done((data) => {
                 let str = renderCustomer(data);
 
-                $("#tbCustomer tbody").append(str);
+                page.elements.tbCustomerBody.prepend(str);
+
+                page.dialogs.elements.modalCreateCustomer.modal("hide");
 
                 removeEventShowUpdateModal();
-                handleShowUpdateModal();
+
+                page.commands.handleShowUpdateModal();
             })
             .fail((error) => {
                 console.error(error);
@@ -243,14 +313,14 @@
         }
 
 
-        function updateCustomer(obj) {
+        page.commands.updateCustomer = (obj) => {
             $.ajax({
                 headers: {
                     "accept": "application/json",
                     "content-type": "application/json"
                 },
                 type: "PATCH",
-                url: "http://localhost:3003/customers/" + obj.id,
+                url: page.urls.updateCustomer + "/" + obj.id,
                 data: JSON.stringify(obj)
             })
             .done((data) => {
@@ -259,60 +329,50 @@
 
                 $("#tr_" + obj.id).replaceWith(str);
 
-                $("#modalUpdate").modal("hide");
+                page.dialogs.elements.modalUpdateCustomer.modal("hide");
 
                 removeEventShowUpdateModal();
-                handleShowUpdateModal();
+                
+                page.commands.handleShowUpdateModal();
             })
             .fail((error) => {
                 console.error(error);
             })
         }
 
-        $("#btnCreateCustomer").on("click", () => {
-            let fullNameCre = $("#fullNameCre").val();
-            let emailCre = $("#emailCre").val();
-            let phoneCre = $("#phoneCre").val();
-            let addressCre = $("#addressCre").val();
-
-            customer.fullName = fullNameCre;
-            customer.email = emailCre;
-            customer.phone = phoneCre;
-            customer.address = addressCre;
-            customer.balance = 0;
-            customer.deleted = 0;
-
-            createCustomer(customer);
+        page.dialogs.elements.btnCreate.on("click", () => {
+            page.dialogs.elements.frmCreateCustomer.trigger("submit");
         }) 
 
 
-        $("#btnUpdate").on("click", () => {
-            let fullNameUp = $("#fullNameUp").val();
-            let emailUp = $("#emailUp").val();
-            let phoneUp = $("#phoneUp").val();
-            let addressUp = $("#addressUp").val();
+        page.dialogs.elements.btnUpdate.on("click", () => {
+            customer.id = page.dialogs.elements.customerIdUp.val();
+            customer.fullName = page.dialogs.elements.fullNameUp.val();
+            customer.email = page.dialogs.elements.emailUp.val();
+            customer.phone = page.dialogs.elements.phoneUp.val();
+            customer.address = page.dialogs.elements.addressUp.val();
 
-            customer.id = $("#customerIdUp").val();
-            customer.fullName = fullNameUp;
-            customer.email = emailUp;
-            customer.phone = phoneUp;
-            customer.address = addressUp;
-
-            updateCustomer(customer);
+            page.commands.updateCustomer(customer);
         })
 
-        function handleShowUpdateModal() {
+        page.commands.handleShowCreateModal = () => {
+            page.elements.btnShowCreateModal.on("click", () => {
+                page.dialogs.elements.modalCreateCustomer.modal("show");
+            })
+        }
+
+        page.commands.handleShowUpdateModal = () => {
             $(".update").on("click", function () {
                 let id = $(this).data("id");
 
-                getCustomerById(id).then((data) => {
-                    $("#customerIdUp").val(id);
-                    $("#fullNameUp").val(data.fullName);
-                    $("#emailUp").val(data.email);
-                    $("#phoneUp").val(data.phone);
-                    $("#addressUp").val(data.address);
+                page.commands.getCustomerById(id).then((data) => {
+                    page.dialogs.elements.customerIdUp.val(id);
+                    page.dialogs.elements.fullNameUp.val(data.fullName);
+                    page.dialogs.elements.emailUp.val(data.email);
+                    page.dialogs.elements.phoneUp.val(data.phone);
+                    page.dialogs.elements.addressUp.val(data.address);
 
-                    $("#modalUpdate").modal("show");
+                    page.dialogs.elements.modalUpdateCustomer.modal("show");
                 })
                 .catch(() => {
                     alert("ID not valid");
@@ -320,11 +380,77 @@
             })
         }
 
+
+        page.dialogs.commands.handleCloseCreateModal = () => {
+            // page.elements.currentRow.val("");
+            page.dialogs.alertDanger.modalCreate.empty().removeClass("show").addClass("hide");
+            page.dialogs.elements.frmCreateCustomer.find("input.error").removeClass("error");
+            page.dialogs.elements.frmCreateCustomer[0].reset();
+            page.dialogs.elements.frmCreateCustomer.validate().resetForm();
+        }
+
         function removeEventShowUpdateModal() {
             $(".update").off();
         }
 
+        page.dialogs.elements.frmCreateCustomer.validate({
+            rules: {
+                fullNameCre: {
+                    required: true,
+                    minlength: 3,
+                    maxlength: 25
+                },
+                emailCre: {
+                    required: true
+                }
+            },
+            messages: {
+                fullNameCre: {
+                    required: "Họ tên là bắt buộc",
+                    minlength: "Họ tên có độ dài tối thiếu là 3 ký tự",
+                    maxlength: "Họ tên có độ dài tối đa là 25 ký tự"
+                },
+                emailCre: {
+                    required: "Email là bắt buộc"
+                }
+            },
+            errorLabelContainer: "#modalCreateCustomer .modal-alert-danger",
+            errorPlacement: function (error, element) {
+                error.appendTo("#modalCreateCustomer .modal-alert-danger");
+            },
+            showErrors: function(errorMap, errorList) {
+                if (this.numberOfInvalids() > 0) {
+                    $("#modalCreateCustomer .modal-alert-danger").removeClass("hide").addClass("show");
+                } else {
+                    $("#modalCreateCustomer .modal-alert-danger").removeClass("show").addClass("hide").empty();
+                    $("#frmCreateCustomer input.error").removeClass("error");
+                }
+                this.defaultShowErrors();
+            },
+            submitHandler: function () {
+                page.commands.createCustomer();
+            }
+        })
+
+
+        page.commands.loadData = () => {
+            page.commands.getAllCustomers();
+        }
+
+        page.inintializeEventControl = () => {
+            page.commands.handleShowCreateModal();
+
+            page.dialogs.elements.modalCreateCustomer.on("hidden.bs.modal", function () {
+                page.dialogs.commands.handleCloseCreateModal();
+            });
+        }
+
         
+        $(() => {
+            page.commands.loadData();
+
+            page.inintializeEventControl();
+        });
 
     </script>
 </body>
